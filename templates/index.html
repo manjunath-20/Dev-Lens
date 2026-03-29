@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevCode — AI Career & Project Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --surface2: #16162a;
+  --border: #22223a;
+  --accent: #6c63ff;
+  --accent2: #ff6b9d;
+  --accent3: #00e5ff;
+  --green: #00ffaa;
+  --yellow: #ffd166;
+  --text: #e2e2f0;
+  --muted: #5a5a7a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(108,99,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108,99,255,0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+.orb1 { width:600px; height:600px; background:rgba(108,99,255,0.1); top:-200px; left:-200px; }
+.orb2 { width:500px; height:500px; background:rgba(255,107,157,0.07); bottom:-150px; right:-150px; }
+
+.wrap { position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 24px 80px; }
+
+/* Header */
+header {
+  text-align: center;
+  padding: 56px 0 40px;
+  animation: fadeDown 0.7s ease both;
+}
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,229,255,0.1);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 11px;
+  color: var(--accent3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.badge-dot { width:6px; height:6px; border-radius:50%; background:var(--accent3); animation: pulse 1.5s infinite; }
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+}
+
+h1 em { font-style: italic; color: var(--accent2); }
+
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 6px;
+  max-width: 520px;
+  margin: 36px auto 40px;
+  animation: fadeUp 0.7s 0.15s ease both;
+}
+
+.tab {
+  flex:1; padding: 13px 10px;
+  border: none; border-radius: 11px;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, var(--accent) 0%, #4a42cc 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+}
+
+.tab:not(.active):hover { color: var(--text); background: var(--surface2); }
+
+.panel { display:none; }
+.panel.active { display:block; animation: fadeUp 0.4s ease both; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: rgba(108,99,255,0.3); }
+
+.card-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cicon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.ci-purple { background: rgba(108,99,255,0.15); }
+.ci-cyan   { background: rgba(0,229,255,0.12); }
+
+.card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; }
+.card-desc  { font-size:11px; color:var(--muted); margin-top:3px; }
+
+/* Textarea */
+textarea {
+  width:100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.8;
+  padding: 16px;
+  resize: vertical;
+  min-height: 180px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+
+/* File drop */
+.file-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 42px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: all 0.3s;
+  position: relative;
+}
+.file-zone:hover, .file-zone.over { border-color: var(--accent3); background: rgba(0,229,255,0.04); }
+.file-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.fz-icon { font-size:36px; margin-bottom:10px; }
+.fz-text { font-size:12px; color:var(--muted); line-height:1.7; }
+.fz-text strong { color:var(--accent3); }
+
+.file-ok {
+  display:none; align-items:center; gap:10px;
+  background: rgba(0,255,170,0.08);
+  border: 1px solid rgba(0,255,170,0.2);
+  border-radius: 10px; padding:12px 16px;
+  font-size:12px; color:var(--green); margin-top:12px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 30px; border: none; border-radius: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.25s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #4a42cc);
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(108,99,255,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,99,255,0.5); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.btn-cyan {
+  background: linear-gradient(135deg, var(--accent3), #0095aa);
+  color: #000;
+  box-shadow: 0 4px 24px rgba(0,229,255,0.25);
+}
+.btn-cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,229,255,0.4); }
+.btn-cyan:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.btn-row { display:flex; justify-content:flex-end; margin-top:18px; }
+
+/* Loader */
+.loader { display:none; text-align:center; padding:48px 20px; }
+.loader.show { display:block; }
+.loader-ring {
+  width:48px; height:48px; border-radius:50%;
+  border:3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+.loader-text { color:var(--muted); font-size:12px; letter-spacing:0.06em; }
+
+/* Results */
+.results { display:none; }
+.results.show { display:block; animation: fadeUp 0.5s ease both; }
+
+.result-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:24px; padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.result-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
+.result-meta  { font-size:11px; color:var(--muted); margin-top:4px; }
+
+.section { margin-bottom:28px; }
+
+.section-label {
+  font-size:10px; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:12px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Tags */
+.tags { display:flex; flex-wrap:wrap; gap:8px; }
+.tag {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:100px;
+  font-size:11.5px; border:1px solid;
+}
+.tag-lang  { background:rgba(108,99,255,0.12); border-color:rgba(108,99,255,0.3); color:#a89fff; }
+.tag-tech  { background:rgba(0,229,255,0.08);  border-color:rgba(0,229,255,0.25); color:#7df0ff; }
+.tag-must  { background:rgba(255,107,157,0.1); border-color:rgba(255,107,157,0.3); color:#ff9dc0; }
+.tag-green { background:rgba(0,255,170,0.08);  border-color:rgba(0,255,170,0.25); color:#00ffaa; }
+
+.pill { font-size:9px; padding:2px 7px; border-radius:100px; letter-spacing:0.06em; }
+.pill-must { background:rgba(255,107,157,0.2); color:var(--accent2); }
+.pill-nice { background:rgba(255,209,102,0.15); color:var(--yellow); }
+
+/* List items */
+.list-items { display:flex; flex-direction:column; gap:8px; }
+.list-item {
+  display:flex; gap:10px; align-items:flex-start;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:12px 14px; font-size:12px; line-height:1.6;
+}
+.li-bullet {
+  width:20px; height:20px; border-radius:6px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; margin-top:1px;
+}
+.lb-purple { background:rgba(108,99,255,0.2); color:var(--accent); }
+.lb-pink   { background:rgba(255,107,157,0.2); color:var(--accent2); }
+.lb-cyan   { background:rgba(0,229,255,0.15); color:var(--accent3); }
+.lb-green  { background:rgba(0,255,170,0.12); color:var(--green); }
+.lb-yellow { background:rgba(255,209,102,0.15); color:var(--yellow); }
+
+/* Module table */
+.mod-table { display:flex; flex-direction:column; gap:6px; }
+.mod-row {
+  display:grid; grid-template-columns:1.5fr 3fr 80px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; overflow:hidden;
+}
+.mod-cell { padding:11px 14px; font-size:12px; }
+.mod-cell:not(:last-child) { border-right:1px solid var(--border); }
+.mod-name { color:var(--accent3); }
+.mod-purpose { color:var(--text); line-height:1.5; }
+.mod-complexity { text-align:center; }
+.cx-low  { color:var(--green); }
+.cx-med  { color:var(--yellow); }
+.cx-high { color:var(--accent2); }
+
+/* Summary box */
+.summary-box {
+  background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(255,107,157,0.06));
+  border: 1px solid rgba(108,99,255,0.2);
+  border-radius: 14px; padding: 20px;
+  font-size: 13px; line-height: 1.8; color: var(--text);
+  font-family: 'Fraunces', serif; font-weight: 300; font-style: italic;
+}
+
+/* Info chips */
+.info-chips { display:flex; flex-wrap:wrap; gap:10px; }
+.chip {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:10px 16px;
+  display:flex; flex-direction:column; gap:3px; min-width:120px;
+}
+.chip-label { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+.chip-value { font-size:13px; color:var(--text); font-family:'Syne',sans-serif; font-weight:600; }
+
+/* Error */
+.error-box {
+  background:rgba(255,107,157,0.08); border:1px solid rgba(255,107,157,0.3);
+  border-radius:12px; padding:16px 20px;
+  color:var(--accent2); font-size:12px; display:none; margin-top:14px;
+}
+
+@keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:none} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:none} }
+@keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes spin     { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="badge"><div class="badge-dot"></div> Powered by Groq — Free</div>
+    <h1>Dev<em>Code</em></h1>
+    <p class="sub">AI-powered intelligence for developers — decode any job posting or project structure in seconds.</p>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('job')">💼 Job Analyzer</button>
+    <button class="tab" onclick="switchTab('project')">🗂 Project Analyzer</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  PANEL 1 — JOB DESCRIPTION ANALYZER   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="panel active" id="panel-job">
+    <div class="card">
+      <div class="card-head">
+        <div class="cicon ci-purple">💼</div>
+        <div>
+          <div class="card-title">Job Description Analyzer</div>
+          <div class="card-desc">Paste any JD — get languages, tech stack, resume tips & full learning roadmap</div>
+        </div>
+      </div>
+      <textarea id="jd-input" placeholder="Paste the full job description here...
+
+Example:
+We're looking for a Senior Backend Engineer with 5+ years of experience in Python and Django. You'll be working on our microservices infrastructure using AWS, Docker, and PostgreSQL. Experience with Redis caching and Celery task queues is a plus..."></textarea>
+      <div class="error-box" id="job-error"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="job-btn" onclick="analyzeJob()">
+          ⚡ Analyze Job Description
+        </button>
+      </div>
+    </div>
+
+    <div class="loader" id="job-loader">
+      <div class="loader-ring"></div>
+      <div class="loader-text">Analyzing with Groq...</div>
+    </div>
+
+    <div class="results" id="job-results"></div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  PANEL 2 — PROJECT STRUCTURE ANALYZER -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="panel" id="panel-project">
+    <div class="card">
+      <div class="card-head">
+        <div class="cicon ci-cyan">🗂</div>
+        <div>
+          <div class="card-title">Project Structure Analyzer</div>
+          <div class="card-desc">Upload a .txt file or paste your project tree — get a full senior dev audit</div>
+        </div>
+      </div>
+
+      <div class="file-zone" id="file-zone"
+           ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <input type="file" accept=".txt,.md,.json" id="file-input" onchange="handleFile(event)">
+        <div class="fz-icon">📂</div>
+        <div class="fz-text">
+          <strong>Click to upload</strong> or drag & drop<br>
+          Supports .txt, .md, .json files
+        </div>
+      </div>
+
+      <div class="file-ok" id="file-ok">
+        <span>✅</span>
+        <span id="file-name">file loaded</span>
+        <button onclick="clearFile()" style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">×</button>
+      </div>
+
+      <div style="margin:16px 0;text-align:center;font-size:11px;color:var(--muted);">— or paste directly —</div>
+
+      <textarea id="proj-input" placeholder="Paste your project structure here...
+
+Example:
+my-ecommerce-app/
+├── app/
+│   ├── __init__.py
+│   ├── models/
+│   │   ├── user.py
+│   │   ├── product.py
+│   │   └── order.py
+│   ├── routes/
+│   │   ├── auth.py
+│   │   └── shop.py
+│   └── services/
+│       └── payment.py
+├── tests/
+├── requirements.txt
+├── Dockerfile
+└── README.md" style="min-height:160px;"></textarea>
+
+      <div class="error-box" id="proj-error"></div>
+      <div class="btn-row">
+        <button class="btn btn-cyan" id="proj-btn" onclick="analyzeProject()">
+          🔍 Analyze Project
+        </button>
+      </div>
+    </div>
+
+    <div class="loader" id="proj-loader">
+      <div class="loader-ring" style="border-top-color:var(--accent3)"></div>
+      <div class="loader-text">Running technical audit with Groq...</div>
+    </div>
+
+    <div class="results" id="proj-results"></div>
+  </div>
+
+</div>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['job','project'][i]===id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── FILE HANDLING ──
+function handleDragOver(e) { e.preventDefault(); document.getElementById('file-zone').classList.add('over'); }
+function handleDragLeave()  { document.getElementById('file-zone').classList.remove('over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('file-zone').classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f) readFile(f);
+}
+function handleFile(e) { const f = e.target.files[0]; if(f) readFile(f); }
+function readFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('proj-input').value = e.target.result;
+    document.getElementById('file-name').textContent = file.name + ' (' + Math.round(file.size/1024*10)/10 + ' KB)';
+    document.getElementById('file-ok').style.display = 'flex';
+  };
+  reader.readAsText(file);
+}
+function clearFile() {
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-ok').style.display = 'none';
+}
+
+// ── API CALLS ──
+async function analyzeJob() {
+  const jd = document.getElementById('jd-input').value.trim();
+  document.getElementById('job-error').style.display = 'none';
+  if (!jd) { showError('job-error', 'Please paste a job description first.'); return; }
+  setLoading('job', true);
+  try {
+    const res  = await fetch('/api/analyze-job', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({job_description: jd})
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.error || 'Unknown error');
+    renderJobResults(json.data);
+  } catch(e) {
+    showError('job-error', '❌ ' + e.message);
+  } finally {
+    setLoading('job', false);
+  }
+}
+
+async function analyzeProject() {
+  const proj = document.getElementById('proj-input').value.trim();
+  document.getElementById('proj-error').style.display = 'none';
+  if (!proj) { showError('proj-error', 'Please paste or upload a project structure first.'); return; }
+  setLoading('project', true);
+  try {
+    const res  = await fetch('/api/analyze-project', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({project_structure: proj})
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.error || 'Unknown error');
+    renderProjectResults(json.data);
+  } catch(e) {
+    showError('proj-error', '❌ ' + e.message);
+  } finally {
+    setLoading('project', false);
+  }
+}
+
+// ── HELPERS ──
+function setLoading(panel, on) {
+  const isJob = panel === 'job';
+  document.getElementById(isJob ? 'job-loader'   : 'proj-loader').classList.toggle('show', on);
+  document.getElementById(isJob ? 'job-btn'      : 'proj-btn').disabled = on;
+  if (on) document.getElementById(isJob ? 'job-results' : 'proj-results').classList.remove('show');
+}
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+function tags(arr, cls) {
+  return (arr||[]).map(t => `<span class="tag ${cls}">${t}</span>`).join('');
+}
+function listItems(arr, bullet, lb) {
+  return (arr||[]).map(i => `
+    <div class="list-item">
+      <div class="li-bullet ${lb}">${bullet}</div>
+      <div>${i}</div>
+    </div>`).join('');
+}
+function numberedList(arr, lb) {
+  return (arr||[]).map((i,idx) => `
+    <div class="list-item">
+      <div class="li-bullet ${lb}">${idx+1}</div>
+      <div>${i}</div>
+    </div>`).join('');
+}
+
+// ── RENDER JOB ──
+function renderJobResults(d) {
+  const el = document.getElementById('job-results');
+  const langTags = (d.languages||[]).map(l =>
+    `<span class="tag tag-lang">${l.name} <span class="pill ${l.priority==='Must'?'pill-must':'pill-nice'}">${l.priority}</span></span>`
+  ).join('');
+  const techTags = (d.technologies||[]).map(t =>
+    `<span class="tag tag-tech">${t.name} <span class="pill ${t.priority==='Must'?'pill-must':'pill-nice'}">${t.priority}</span></span>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="result-header">
+        <div>
+          <div class="result-title">📋 ${d.role_title||'Job Analysis'}</div>
+          <div class="result-meta">Analyzed by Groq · Llama 3.1 8B · Free tier</div>
+        </div>
+      </div>
+
+      <div class="info-chips" style="margin-bottom:24px;">
+        <div class="chip"><div class="chip-label">Seniority</div><div class="chip-value">${d.seniority||'—'}</div></div>
+        <div class="chip"><div class="chip-label">Est. Salary</div><div class="chip-value">${d.salary_range||'N/A'}</div></div>
+      </div>
+
+      <div class="summary-box" style="margin-bottom:24px;">"${d.summary||''}"</div>
+
+      <div class="section">
+        <div class="section-label">Programming Languages</div>
+        <div class="tags">${langTags}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Technologies & Tools</div>
+        <div class="tags">${techTags}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Key Concepts to Master</div>
+        <div class="tags">${tags(d.concepts, 'tag-green')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">📄 Resume Tips</div>
+        <div class="list-items">${listItems(d.resume_tips, '✦', 'lb-purple')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🗺 Learning Roadmap</div>
+        <div class="list-items">${numberedList(d.skills_gap_roadmap, 'lb-cyan')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🎯 Likely Interview Topics</div>
+        <div class="tags">${tags(d.interview_topics, 'tag-must')}</div>
+      </div>
+    </div>`;
+  el.classList.add('show');
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ── RENDER PROJECT ──
+function renderProjectResults(d) {
+  const el = document.getElementById('proj-results');
+  const langTags = (d.languages||[]).map(l =>
+    `<span class="tag tag-lang" title="${l.evidence||''}">${l.name} <span class="pill ${l.confidence==='High'?'pill-must':'pill-nice'}">${l.confidence}</span></span>`
+  ).join('');
+  const fwTags = (d.frameworks||[]).map(f =>
+    `<span class="tag tag-tech" title="${f.role||''}">${f.name}</span>`
+  ).join('');
+  const modRows = (d.key_modules||[]).map(m => `
+    <div class="mod-row">
+      <div class="mod-cell mod-name">${m.module}</div>
+      <div class="mod-cell mod-purpose">${m.purpose}</div>
+      <div class="mod-cell mod-complexity cx-${(m.complexity||'low').toLowerCase()}">${m.complexity}</div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="result-header">
+        <div>
+          <div class="result-title">🗂 ${d.project_name||'Project Analysis'}</div>
+          <div class="result-meta">Senior dev audit by Groq · Llama 3.1 8B · Free tier</div>
+        </div>
+      </div>
+
+      <div class="info-chips" style="margin-bottom:24px;">
+        <div class="chip"><div class="chip-label">Project Type</div><div class="chip-value">${d.project_type||'—'}</div></div>
+        <div class="chip"><div class="chip-label">Domain</div><div class="chip-value">${d.domain||'—'}</div></div>
+        <div class="chip"><div class="chip-label">Architecture</div><div class="chip-value">${d.architecture_pattern||'—'}</div></div>
+        <div class="chip"><div class="chip-label">Maturity</div><div class="chip-value">${d.maturity||'—'}</div></div>
+        <div class="chip"><div class="chip-label">Team Size</div><div class="chip-value">${d.estimated_team_size||'—'}</div></div>
+      </div>
+
+      <div class="summary-box" style="margin-bottom:24px;">"${d.summary||''}"</div>
+
+      <div class="section">
+        <div class="section-label">Languages Detected</div>
+        <div class="tags">${langTags}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Frameworks & Libraries</div>
+        <div class="tags">${fwTags}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Databases</div>
+        <div class="tags">${tags(d.databases, 'tag-green')}</div>
+      </div>
+
+      ${modRows ? `
+      <div class="section">
+        <div class="section-label">Key Modules</div>
+        <div class="mod-table">
+          <div class="mod-row" style="border-color:transparent">
+            <div class="mod-cell" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Module</div>
+            <div class="mod-cell" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Purpose</div>
+            <div class="mod-cell" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center">Complexity</div>
+          </div>
+          ${modRows}
+        </div>
+      </div>` : ''}
+
+      <div class="section">
+        <div class="section-label">✅ Code Quality Signals</div>
+        <div class="list-items">${listItems(d.code_quality_signals, '✦', 'lb-green')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">⚠️ Technical Debt Risks</div>
+        <div class="list-items">${listItems(d.technical_debt_risks, '⚠', 'lb-yellow')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🔧 Missing Essentials</div>
+        <div class="list-items">${listItems(d.missing_essentials, '✗', 'lb-pink')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">🧠 Senior Dev Recommendations</div>
+        <div class="list-items">${numberedList(d.senior_recommendations, 'lb-cyan')}</div>
+      </div>
+    </div>`;
+  el.classList.add('show');
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
